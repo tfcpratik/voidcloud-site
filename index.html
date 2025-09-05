@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VOID CLOUD — Lag-Free Minecraft Hosting</title>
+  <meta name="description" content="Void Cloud — Lag-Free Minecraft Hosting. Fast NVMe, Ryzen 5990X, instant setup, DDoS protection." />
+
+  <!-- GSAP for smooth reveal/animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+
+  <style>
+    /* === Variables & Reset === */
+    :root{
+      --bg:#080710; /* deep space */
+      --card:#0d0f14;
+      --muted:#9aa3b2;
+      --accent:#7f5cff; /* void purple */
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --glow: 0 8px 30px rgba(127,92,255,0.12), inset 0 1px 0 rgba(255,255,255,0.02);
+      --maxw:1200px;
+      --radius:16px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{background: radial-gradient(1200px 600px at 10% 10%, rgba(127,92,255,0.06), transparent),
+      radial-gradient(900px 400px at 85% 85%, rgba(65,170,255,0.03), transparent),
+      var(--bg); color:#e6eef9; -webkit-font-smoothing:antialiased;}
+
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+
+    .container{max-width:var(--maxw);margin:0 auto;padding:32px}
+
+    /* === Header / Navbar === */
+    header{position:sticky;top:12px;z-index:50;backdrop-filter:blur(6px);}
+    .nav-wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border-radius:12px;background:linear-gradient(180deg,var(--glass),var(--glass-2));box-shadow:var(--glow)}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand img{width:48px;height:48px;border-radius:12px;filter:drop-shadow(0 6px 20px rgba(127,92,255,0.25));}
+    .brand h1{font-size:15px;letter-spacing:0.6px}
+    nav ul{display:flex;gap:12px;align-items:center;list-style:none}
+    nav a{padding:8px 12px;border-radius:10px;color:var(--muted);font-weight:600;transition:all .25s}
+    nav a:hover{color:white;transform:translateY(-3px);box-shadow:0 6px 18px rgba(127,92,255,0.08);}
+    nav a.active{color:white;background:linear-gradient(90deg, rgba(127,92,255,0.12), rgba(65,170,255,0.02));box-shadow:0 8px 30px rgba(127,92,255,0.12);border:1px solid rgba(127,92,255,0.14)}
+
+    .cta{display:flex;gap:8px}
+    .btn{background:linear-gradient(90deg,var(--accent), #4fb3ff);padding:10px 14px;border-radius:12px;font-weight:700;color:#031126;box-shadow:0 8px 30px rgba(127,92,255,0.12);}
+    .btn.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
+
+    /* === Hero === */
+    .hero{padding:56px 0;display:grid;grid-template-columns:1fr 420px;gap:36px;align-items:center}
+    .hero .left h2{font-size:36px;line-height:1.02;margin-bottom:12px}
+    .hero .left p{color:var(--muted);margin-bottom:18px}
+    .hero .left .row{display:flex;gap:12px;align-items:center}
+
+    .card{background:linear-gradient(180deg,var(--card),#0b0c10);padding:18px;border-radius:14px;border:1px solid rgba(255,255,255,0.02);box-shadow:var(--glow)}
+
+    /* Hero right = floating servers */
+    .hero-preview{position:relative;padding:18px;border-radius:12px;overflow:visible}
+    .server-box{background:linear-gradient(180deg, rgba(127,92,255,0.07), rgba(255,255,255,0.01));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .server-icon{width:84px;height:84px;border-radius:12px;overflow:hidden}
+    .server-meta{margin-left:12px}
+
+    /* Particles / stars */
+    .stars{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:0}
+    .stars canvas{width:100%;height:100%}
+
+    /* === Plans === */
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:18px}
+    .plan{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);transition:transform .28s, box-shadow .28s}
+    .plan:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(127,92,255,0.08)}
+    .plan .title{font-weight:800;margin-bottom:6px}
+    .price{font-size:20px;font-weight:900;margin:8px 0}
+    .specs{color:var(--muted);font-weight:700;margin-bottom:12px}
+    .choose{display:inline-block;padding:10px 12px;border-radius:10px;font-weight:800}
+
+    /* Billing toggle */
+    .toggle{display:inline-flex;background:rgba(255,255,255,0.03);padding:6px;border-radius:999px;border:1px solid rgba(255,255,255,0.02)}
+    .toggle button{background:transparent;padding:6px 12px;border-radius:999px;border:none;color:var(--muted);font-weight:700}
+    .toggle button.active{background:linear-gradient(90deg,var(--accent), #4fb3ff);color:#031126}
+
+    /* Features & accordion */
+    .features{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .accordion{background:transparent;border-radius:12px;padding:12px}
+    .faq-item{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:12px;border-radius:10px;margin-bottom:8px}
+
+    /* Demo panel mock */
+    .panel-demo{display:flex;gap:12px;flex-direction:column}
+    .panel-screenshot{height:220px;border-radius:10px;background:linear-gradient(90deg, rgba(127,92,255,0.07), rgba(65,170,255,0.03));display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
+
+    /* About */
+    .team{display:flex;gap:12px;flex-wrap:wrap}
+    .team .member{width:140px}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr;}
+      header{top:8px}
+      .container{padding:18px}
+    }
+
+    /* Footer */
+    footer{margin-top:36px;padding:24px;border-radius:12px;background:linear-gradient(180deg,var(--card),#07101b);border:1px solid rgba(255,255,255,0.02)}
+
+    /* small utils */
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .center{text-align:center}
+
+    /* Active QuickLink glow on hover */
+    .quicklinks a:hover{box-shadow:0 12px 40px rgba(127,92,255,0.12);transform:translateY(-4px)}
+
+  </style>
+</head>
+<body>
+
+  <!-- Stars (canvas) -->
+  <div class="stars"><canvas id="starsCanvas"></canvas></div>
+
+  <header class="container">
+    <div class="nav-wrap">
+      <div class="brand">
+        <img src="https://media.discordapp.net/attachments/1413150383546826877/1413196600674877543/file_000000000250622f91d848280a97e735.png?ex=68bbb625&is=68ba64a5&hm=92be70de64839b1a1976a1f7780ff9c86682c5fe812bda735f6c254f6d437bc5&=&format=webp&quality=lossless&width=788&height=788" alt="VOID CLOUD" />
+        <div>
+          <div style="font-size:12px;opacity:0.9">VOID CLOUD</div>
+          <div style="font-size:11px;color:var(--muted)">Powered by Ryzen 5990X | Fast NVMe</div>
+        </div>
+      </div>
+
+      <nav>
+        <ul id="navList">
+          <li><a href="#home" data-target="home" class="active">Home</a></li>
+          <li><a href="#plans" data-target="plans">Plans</a></li>
+          <li><a href="#features" data-target="features">Features</a></li>
+          <li><a class="btn" href="https://panel.voidcloud.tech/" target="_blank">Panel</a>
+          <li><a class="btn" href="https://dash.voidcloud.tech/" target="_blank">Dashboard</a>
+          <li class="quicklinks"><a href="#support" data-target="support">Support</a></li>
+        </ul>
+      </nav>
+
+      <div class="cta">
+        <a class="btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Join Discord</a>
+        <a class="btn ghost" href="#plans">View Plans</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HERO -->
+    <section id="home" class="hero" data-section>
+      <div class="left">
+        <h2>UNLEASH YOUR WORLD WITH <span style="color:var(--accent)">VOID CLOUD</span></h2>
+        <p class="muted">Powerful, Lag-Free Minecraft Server Hosting — Instant setup, DDoS protection, NVMe storage, multi-region nodes.</p>
+
+        <div class="row">
+          <a class="btn" href="#plans">Get Started</a>
+          <a class="btn ghost" href="#panel">View Panel</a>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">
+          <div class="card" style="display:flex;align-items:center;gap:12px">
+            <strong>99.99% Uptime</strong>
+            <span class="muted small">Instant setup • Free Subdomain • DDoS Protection</span>
+          </div>
+          <div class="card muted small" style="https://media.discordapp.net/attachments/1413150383546826877/1413196600674877543/file_000000000250622f91d848280a97e735.png?ex=68bbb625&is=68ba64a5&hm=92be70de64839b1a1976a1f7780ff9c86682c5fe812bda735f6c254f6d437bc5&=&format=webp&quality=lossless&width=788&height=788">
+            <div style="font-weight:700">Powered by Ryzen 5990X</div>
+            <div>Fast NVMe • Smooth & Lag-Free</div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:800">VOID CLOUD – Lag-Free Minecraft Hosting 🌍</div>
+                <div class="muted small">Paid & free plans. Buy via Discord or try free plans in our panel demo.</div>
+              </div>
+              <div style="text-align:right">
+                <div class=""></div>
+                <img src="" alt="" style="https://media.discordapp.net/attachments/1413150383546826877/1413196600674877543/file_000000000250622f91d848280a97e735.png?ex=68bbb625&is=68ba64a5&hm=92be70de64839b1a1976a1f7780ff9c86682c5fe812bda735f6c254f6d437bc5&=&format=webp&quality=lossless&width=788&height=788"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="hero-preview">
+        <div class="server-box card">
+          <div style="display:flex;align-items:center">
+            <div class="server-icon"><img src="https://media.discordapp.net/attachments/1413150383546826877/1413196600674877543/file_000000000250622f91d848280a97e735.png?ex=68bbb625&is=68ba64a5&hm=92be70de64839b1a1976a1f7780ff9c86682c5fe812bda735f6c254f6d437bc5&=&format=webp&quality=lossless&width=788&height=788" alt="icon" style="width:100%;height:100%;object-fit:cover" /></div>
+            <div class="server-meta">
+              <div style="font-weight:800">VOID | Sample Server</div>
+              <div class="muted small">Java & Bedrock • 2GB RAM • 10 players</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+            <div class="card small muted" style="padding:8px;border-radius:8px">Instant Setup</div>
+            <div class="card small muted" style="padding:8px;border-radius:8px">DDoS Protected</div>
+            <div class="card small muted" style="padding:8px;border-radius:8px">Free Subdomain</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANS -->
+    <section id="plans" style="margin-top:36px" data-section>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <h3>Plans & Pricing</h3>
+          <p class="muted">Choose a plan that fits your world. Toggle billing to switch monthly/yearly.</p>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="toggle" id="billingToggle">
+            <button data-billing="monthly" class="active">Monthly</button>
+            <button data-billing="yearly">Yearly</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="plans-grid" id="plansGrid">
+
+        <!-- Sapling (₹59 / $0.70) -->
+        <div class="plan" data-plan="sapling">
+          <div class="title">🌱 SAPLING PLAN</div>
+          <div class="specs">3 GB RAM • 1 Core • 5 GB NVMe • 5–10 Players</div>
+          <div class="price" data-price-amount-monthly="59" data-price-amount-yearly="590">₹59 / $0.70</div>
+          <div class="small muted">Powered by Ryzen 5990X</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Wood (₹99 / $1.20) -->
+        <div class="plan" data-plan="wood">
+          <div class="title">🌳 WOOD PLAN</div>
+          <div class="specs">4 GB RAM • 2 Cores • 10 GB NVMe • 10–15 Players</div>
+          <div class="price" data-price-amount-monthly="99" data-price-amount-yearly="990">₹99 / $1.20</div>
+          <div class="small muted">Instant setup • Free subdomain</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Stone -->
+        <div class="plan" data-plan="stone">
+          <div class="title">🪨 STONE PLAN</div>
+          <div class="specs">6 GB RAM • 3 Cores • 15 GB NVMe • 15–25 Players</div>
+          <div class="price" data-price-amount-monthly="159" data-price-amount-yearly="1590">₹159 / $1.90</div>
+          <div class="small muted">Free backups • 24/7 support</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Iron -->
+        <div class="plan" data-plan="iron">
+          <div class="title">⛓️ IRON PLAN</div>
+          <div class="specs">8 GB RAM • 4 Cores • 50 GB NVMe • 25–35 Players</div>
+          <div class="price" data-price-amount-monthly="229" data-price-amount-yearly="2290">₹229 / $2.75</div>
+          <div class="small muted">Autoscaling available</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Gold -->
+        <div class="plan" data-plan="gold">
+          <div class="title">🥇 GOLD PLAN</div>
+          <div class="specs">12 GB RAM • 4 Cores • 20 GB NVMe • 35–50 Players</div>
+          <div class="price" data-price-amount-monthly="329" data-price-amount-yearly="3290">₹329 / $3.95</div>
+          <div class="small muted">Managed backups • Priority support</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Diamond -->
+        <div class="plan" data-plan="diamond">
+          <div class="title">💎 DIAMOND PLAN</div>
+          <div class="specs">16 GB RAM • 6 Cores • 25 GB NVMe • 50–65 Players</div>
+          <div class="price" data-price-amount-monthly="429" data-price-amount-yearly="4290">₹429 / $5.15</div>
+          <div class="small muted">Dedicated CPU slice</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Emerald -->
+        <div class="plan" data-plan="emerald">
+          <div class="title">✨ EMERALD PLAN</div>
+          <div class="specs">24 GB RAM • 8 Cores • 30 GB NVMe • 65–90 Players</div>
+          <div class="price" data-price-amount-monthly="599" data-price-amount-yearly="5990">₹599 / $7.20</div>
+          <div class="small muted">High-performance NVMe</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Netherite -->
+        <div class="plan" data-plan="netherite">
+          <div class="title">⚫ NETHERITE PLAN</div>
+          <div class="specs">32 GB RAM • 10 Cores • 40 GB NVMe • 90–120 Players</div>
+          <div class="price" data-price-amount-monthly="799" data-price-amount-yearly="7990">₹799 / $9.60</div>
+          <div class="small muted">Ultra nodes • Dedicated IPs</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+        <!-- Bedrock -->
+        <div class="plan" data-plan="bedrock">
+          <div class="title">🪨 BEDROCK PLAN</div>
+          <div class="specs">48 GB RAM • 12 Cores • 50 GB NVMe • 120–200+ Players</div>
+          <div class="price" data-price-amount-monthly="1299" data-price-amount-yearly="12990">₹1299 / $15.65</div>
+          <div class="small muted">Bedrock-optimized nodes</div>
+          <div style="margin-top:12px"><a class="choose btn" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy on Discord</a></div>
+        </div>
+
+      </div>
+
+      <!-- Comparison table (compact) -->
+      <div style="margin-top:18px" class="card">
+        <div style="overflow:auto">
+          <table style="width:100%;border-collapse:collapse;min-width:720px">
+            <thead><tr style="text-align:left;color:var(--muted)"><th>Feature</th><th>Sapling</th><th>Wood</th><th>Stone</th><th>Iron</th><th>Gold</th><th>Diamond</th></tr></thead>
+            <tbody>
+              <tr><td class="muted small">RAM</td><td>3GB</td><td>4GB</td><td>6GB</td><td>8GB</td><td>12GB</td><td>16GB</td></tr>
+              <tr><td class="muted small">CPU (cores)</td><td>1</td><td>2</td><td>3</td><td>4</td><td>4</td><td>6</td></tr>
+              <tr><td class="muted small">Players</td><td>5–10</td><td>10–15</td><td>15–25</td><td>25–35</td><td>35–50</td><td>50–65</td></tr>
+              <tr><td class="muted small">NVMe</td><td>5GB</td><td>10GB</td><td>15GB</td><td>50GB</td><td>20GB</td><td>25GB</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" style="margin-top:36px" data-section>
+      <h3>Features</h3>
+      <p class="muted">Everything you need to run a smooth Minecraft experience.</p>
+
+      <div class="features" style="margin-top:12px">
+        <div>
+          <div class="card">
+            <h4>One-Click Modpack Install</h4>
+            <p class="muted small">Install popular modpacks in seconds (FTB, Tekkit, SkyFactory).</p>
+          </div>
+
+          <div class="card" style="margin-top:8px">
+            <h4>Bedrock & Java Support</h4>
+            <p class="muted small">Run both server types from the same control panel.</p>
+          </div>
+
+          <div class="card" style="margin-top:8px">
+            <h4>Free Backups</h4>
+            <p class="muted small">Automated daily backups with restore points.</p>
+          </div>
+
+        </div>
+
+        <div>
+          <div class="card">
+            <h4>24/7 Support</h4>
+            <p class="muted small">Support via Discord and ticketing — quick responses.</p>
+          </div>
+
+          <div class="card" style="margin-top:8px">
+            <h4>Custom Panel</h4>
+            <p class="muted small">Built-in dashboard with file manager, console, and player manager.</p>
+          </div>
+
+          <div class="card" style="margin-top:8px">
+            <h4>Server Auto-Scaling</h4>
+            <p class="muted small">Scale resources when traffic spikes (optional).</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- PANEL DEMO -->
+    <section id="panel" style="margin-top:36px" data-section>
+      <h3>Panel Demo</h3>
+      <p class="muted">Try a mock of our control panel. For full access, join Discord to purchase or request free trial keys.</p>
+
+      <div class="panel-demo">
+        <div class="panel-screenshot">Panel demo (mockup) — File manager, Console, Players</div>
+        <div style="display:flex;gap:12px">
+          <a class="btn" href="#" onclick="alert('Demo mode — join Discord to get access');return false;">Try Demo</a>
+          <a class="btn ghost" href="https://discord.gg/qgKMzfyS4N" target="_blank">Buy / Join on Discord</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" style="margin-top:36px" data-section>
+      <h3>About Us</h3>
+      <div class="card" style="margin-top:12px">
+        <p class="muted">NOT web dev / co-owner — <strong>PAIN OWNER</strong>. VOID CLOUD's vision is to offer elite hosting to every Minecrafter: fast nodes, instant setup, and fair pricing. We operate multi-region nodes (NA, EU, Asia) and automate deployments with modern container tooling.</p>
+
+        <h4 style="margin-top:12px">Team</h4>
+        <div class="team">
+          <div class="member card">
+            <div style="font-weight:800">PAIN OWNER</div>
+            <div class="muted small">Founder & Operator</div>
+          </div>
+          <div class="member card">
+            <div style="font-weight:800">NOT X</div>
+            <div class="muted small">CO-OWNER & WEB DEGINER</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUPPORT / FAQ -->
+    <section id="support" style="margin-top:36px" data-section>
+      <h3>Support & FAQ</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <div class="card" style="flex:1;min-width:320px">
+          <h4>Frequently Asked</h4>
+          <div class="faq-item">Q: How do I buy? <div class="muted small">A: Join our Discord and a staff will assist with payment and provisioning.</div></div>
+          <div class="faq-item">Q: Free plans? <div class="muted small">A: Free trials are sometimes available — request in Discord.</div></div>
+          <div class="faq-item">Q: Real-time status? <div class="muted small">A: A status page link can be shared in Discord; we provide uptime checks.</div></div>
+        </div>
+
+        <div class="card" style="width:320px">
+          <h4>Contact Support</h4>
+          <form onsubmit="alert('This is a mock form — join Discord for support');return false;">
+            <label class="small muted">Email</label>
+            <input required type="email" placeholder="you@example.com" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <label class="small muted">Issue</label>
+            <textarea required placeholder="Describe your problem" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit"></textarea>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+              <button class="btn ghost" type="submit">Open Ticket</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGIN / REGISTER (stub) -->
+    <section id="auth" style="margin-top:36px" data-section>
+      <h3>Login / Register</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <div class="card" style="flex:1;min-width:320px">
+          <h4>Login</h4>
+          <form onsubmit="alert('Auth is mock in this static file. Use your panel credentials or Discord OAuth in production.');return false;">
+            <input placeholder="email" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <input placeholder="password" type="password" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn">Login</button></div>
+          </form>
+        </div>
+
+        <div class="card" style="width:320px">
+          <h4>Register</h4>
+          <form onsubmit="alert('Registration mock — connect to panel or Discord OAuth in real service');return false;">
+            <input placeholder="email" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <input placeholder="username" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+            <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost">Register</button></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOG / UPDATES (simple) -->
+    <section id="blog" style="margin-top:36px" data-section>
+      <h3>Blog & Updates</h3>
+      <div class="card" style="margin-top:12px">Post-Minecraft news and tutorials. (Use a CMS for dynamic posts.)</div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="margin-top:36px" class="container">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:800">VOID CLOUD</div>
+          <div class="muted small">© VOID CLOUD — Powered by Ryzen 5990X • Fast NVMe</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <a href="https://discord.gg/qgKMzfyS4N" target="_blank">Discord</a>
+          <a href="#" onclick="alert('Mock: status page');return false;">Status</a>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // === Stars background ===
+    (function(){
+      const canvas = document.getElementById('starsCanvas');
+      const ctx = canvas.getContext('2d');
+      let w,h,stars=[];
+      function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight; initStars()}
+      function rand(min,max){return Math.random()*(max-min)+min}
+      function initStars(){stars=[];for(let i=0;i<250;i++){stars.push({x:rand(0,w),y:rand(0,h),r:rand(0.3,1.4),alpha:rand(0.1,0.9),vx:rand(-0.02,0.02)})}}
+      function tick(){ctx.clearRect(0,0,w,h);for(const s of stars){s.x+=s.vx;s.alpha+=Math.sin(Date.now()/1000+ s.r)*0.002; ctx.globalAlpha = Math.max(0.05, Math.min(1, s.alpha)); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();}requestAnimationFrame(tick)}
+      addEventListener('resize',resize);
+      resize();tick();
+    })();
+
+    // === Smooth reveal with GSAP ===
+    window.addEventListener('load',()=>{
+      gsap.from('[data-section]',{autoAlpha:0,y:20,stagger:0.12,duration:0.9,ease:'power3.out'});
+    });
+
+    // === Billing toggle logic ===
+    (function(){
+      const toggle = document.getElementById('billingToggle');
+      if(!toggle) return;
+      toggle.addEventListener('click', e => {
+        if(e.target.tagName !== 'BUTTON') return;
+        [...toggle.querySelectorAll('button')].forEach(b=>b.classList.remove('active'));
+        e.target.classList.add('active');
+        const mode = e.target.dataset.billing; // monthly/yearly
+        document.querySelectorAll('.plan .price').forEach(priceEl =>{
+          const m = priceEl.dataset.priceAmountMonthly;
+          const y = priceEl.dataset.priceAmountYearly;
+          if(mode==='monthly') priceEl.textContent = '₹' + m + ' / ' + convertUSD(m);
+          else priceEl.textContent = '₹' + y + ' / ' + convertUSD(y);
+        });
+      });
+
+      function convertUSD(n){
+        // crude label for USD — the user gave USD equivalents in prompt; this keeps same scale roughly
+        // for this static template we will approximate USD by dividing by ~84 (not a live rate)
+        const usd = (Number(n)/84).toFixed(2);
+        return '$' + usd;
+      }
+    })();
+
+    // === Navbar active link on scroll & glow highlight for Quick Links ===
+    (function(){
+      const sections = document.querySelectorAll('[data-section]');
+      const navLinks = document.querySelectorAll('#navList a');
+      const sectionMap = Array.from(sections).map(s=>({id:s.id,top:()=>s.getBoundingClientRect().top+window.scrollY}));
+
+      function onScroll(){
+        const scrollPos = window.scrollY + (window.innerHeight/3);
+        let activeId = sectionMap[0].id;
+        for(const s of sectionMap){ if(s.top() <= scrollPos) activeId = s.id }
+        navLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target===activeId); });
+      }
+      addEventListener('scroll', onScroll);
+      addEventListener('resize', onScroll);
+      onScroll();
+
+      // Smooth scroll for local anchors
+      document.querySelectorAll('a[href^="#"]').forEach(a=>{
+        a.addEventListener('click', e=>{
+          const href = a.getAttribute('href');
+          if(!href || href === '#') return;
+          const el = document.querySelector(href);
+          if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth',block:'start'}); history.replaceState(null,'',href); }
+        });
+      });
+
+    })();
+
+  </script>
+</body>
+</html>
